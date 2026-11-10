@@ -11,13 +11,19 @@ export interface Message {
     referenced_message?: { id: string; content: string; author?: Author; } | null;
     sticker_items?: { id: string; name: string; format_type: number; }[];
 }
-export interface Conversation { id: string; name: string; }
+export interface Conversation { id: string; name: string; guildId?: string; }
 export interface Range { after?: number; before: number; }
-export interface ScanResult { owner: string; channels: Conversation[]; range: Range; messages: Message[]; scanned: number; ownCount: number; }
-export interface Progress { phase: string; scanned: number; matched: number; deleted: number; missing: number; total: number; channel: string; paused: boolean; }
+export interface TextFilter { text: string; mode: "exact" | "contains"; }
+export const matchesText = (content: string, filter?: TextFilter) => {
+    const text = filter?.text.trim().toLowerCase();
+    return !text || (filter?.mode === "exact" ? content.toLowerCase() === text : content.toLowerCase().includes(text));
+};
+export interface ScanResult { owner: string; channels: Conversation[]; range: Range; messages: Message[]; scanned: number; ownCount: number; filter?: TextFilter; }
+export interface Progress { phase: string; scanned: number; matched: number; deleted: number; missing: number; skipped?: number; total: number; channel: string; paused: boolean; }
 export interface Transport {
     owner(): string | undefined;
     privateChannel(id: string): boolean;
+    validateChannel?(channel: Conversation): Promise<void>;
     page(channel: string, before: string): Promise<unknown>;
     message(channel: string, id: string): Promise<unknown>;
     remove(channel: string, id: string): Promise<void>;
@@ -90,12 +96,17 @@ export class Job {
             }
         }
     }
-    async scan(channels: Conversation[], range: Range, mode: "purge" | "export", limit = 50000): Promise<ScanResult> {
-        if (!channels.length || channels.some(c => !validId(c.id))) throw Error("Select at least one DM.");
+    private async validate(channel: Conversation) {
+        if (this.api.validateChannel) await this.request(() => this.api.validateChannel!(channel));
+        else if (!this.api.privateChannel(channel.id)) throw Error("The conversation is no longer an accessible DM.");
+        this.assertAccount();
+    }
+    async scan(channels: Conversation[], range: Range, mode: "purge" | "export", limit = 50000, filter?: TextFilter): Promise<ScanResult> {
+        if (!channels.length || channels.some(c => !validId(c.id))) throw Error("Select at least one conversation or channel.");
         if (!Number.isFinite(range.before) || range.after !== undefined && (!Number.isFinite(range.after) || range.after >= range.before)) throw Error("Choose a valid date range.");
         const messages: Message[] = [], seen = new Set<string>(); let scanned = 0, ownCount = 0;
         for (const channel of channels) {
-            await this.checkpoint(); if (!this.api.privateChannel(channel.id)) throw Error("Only DMs and group DMs are supported.");
+            await this.validate(channel);
             let cursor = snowflakeAt(range.before), done = false;
             while (!done) {
                 this.update({ phase: mode === "purge" ? "Scanning your messages…" : "Reading conversation…", channel: channel.name });
@@ -113,23 +124,24 @@ export class Job {
                     if (range.after !== undefined && timestamp < range.after) { done = true; continue; }
                     if (timestamp >= range.before) continue;
                     const own = deletable(message, this.owner); if (own) ownCount++;
-                    if (mode === "export" || own) messages.push(message);
+                    if (mode === "export" || own && matchesText(message.content, filter)) messages.push(message);
                 }
-                cursor = oldest; this.update({ scanned, matched: mode === "purge" ? ownCount : messages.length });
+                cursor = oldest; this.update({ scanned, matched: messages.length });
                 if (!done) await this.sleep(Math.max(350, this.delay / 3));
             }
         }
         this.assertAccount();
-        return { owner: this.owner, channels: channels.map(c => ({ ...c })), range: { ...range }, messages, scanned, ownCount };
+        return { owner: this.owner, channels: channels.map(c => ({ ...c })), range: { ...range }, messages, scanned, ownCount, filter: mode === "purge" && filter ? { ...filter } : undefined };
     }
     async purge(plan: ScanResult) {
         if (plan.owner !== this.owner) throw Error("The preview belongs to another account. Scan again.");
-        const channels = new Set(plan.channels.map(c => c.id));
-        if (plan.messages.some(m => !deletable(m, this.owner) || !validId(m.id) || !channels.has(m.channel_id))) throw Error("The purge preview contains an invalid candidate. Scan again.");
+        const channels = new Map(plan.channels.map(c => [c.id, c]));
+        if (plan.messages.some(m => !deletable(m, this.owner) || !validId(m.id) || !channels.has(m.channel_id) || !matchesText(m.content, plan.filter))) throw Error("The purge preview contains an invalid candidate. Scan again.");
+        for (const channel of channels.values()) await this.validate(channel);
         this.update({ phase: "Deleting your messages…", scanned: plan.scanned, matched: plan.messages.length, total: plan.messages.length, deleted: 0, missing: 0 });
+        const deletedChannels = new Set<string>();
         for (const candidate of plan.messages) {
             await this.checkpoint();
-            if (!this.api.privateChannel(candidate.channel_id)) throw Error("The conversation is no longer an accessible DM.");
             this.update({ channel: plan.channels.find(c => c.id === candidate.channel_id)?.name ?? candidate.channel_id });
             let stage = "verify";
             try {
@@ -137,8 +149,14 @@ export class Job {
                 const raw = await this.request(() => this.api.message(candidate.channel_id, candidate.id));
                 const current = normalizeMessage(raw, candidate.channel_id);
                 if (current.id !== candidate.id || !deletable(current, this.owner)) throw Error("Message ownership no longer matches the preview. Purge stopped.");
+                if (!matchesText(current.content, plan.filter)) {
+                    this.update({ skipped: (this.progress.skipped ?? 0) + 1 });
+                    await this.sleep(Math.max(1000, this.delay));
+                    continue;
+                }
                 stage = "delete";
                 await this.request(() => this.api.remove(candidate.channel_id, candidate.id));
+                deletedChannels.add(candidate.channel_id);
                 this.update({ deleted: this.progress.deleted + 1, phase: "Deleting your messages…" });
             } catch (error: any) {
                 if ((error?.status ?? error?.response?.status) === 404) this.update({ missing: this.progress.missing + 1 });
@@ -147,5 +165,6 @@ export class Job {
             await this.sleep(Math.max(1000, this.delay));
         }
         this.update({ phase: "Purge complete" });
+        return deletedChannels;
     }
 }

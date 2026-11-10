@@ -30,6 +30,6 @@ test('cancelling native media is scoped to the requesting window',async()=>{
 });
 test('renderer fallback propagates job cancellation to native downloads and refuses late bytes',async()=>{
  const controller=new AbortController();let request,cancelled=false,finish;
- globalThis.VencordNative={pluginHelpers:{DMsManager:{downloadMedia:async(u,max,r)=>{request=r;return await new Promise(resolve=>finish=()=>resolve({ok:true,bytes:new Uint8Array([1])}));},cancelMedia:async r=>{assert.equal(r,request);cancelled=true;}}}};
+ globalThis.VencordNative={pluginHelpers:{MessagesManager:{downloadMedia:async(u,max,r)=>{request=r;return await new Promise(resolve=>finish=()=>resolve({ok:true,bytes:new Uint8Array([1])}));},cancelMedia:async r=>{assert.equal(r,request);cancelled=true;}}}};
  const pending=downloadDesktopMedia(url,10,controller.signal);controller.abort(Error('Account changed.'));finish();await assert.rejects(pending,/Account changed/);assert.equal(cancelled,true);delete globalThis.VencordNative;
 });

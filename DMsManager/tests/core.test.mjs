@@ -94,3 +94,19 @@ test('HTML makes links clickable, keeps code literal, and supports audio and rep
  assert.match(html,/href="https:\/\/example.com\/a\?x=1&amp;y=2"/);assert.match(html,/href="https:\/\/example.com\/b"[^>]*>A link<\/a>/);
  assert.doesNotMatch(html,/href="https:\/\/code.example/);assert.match(html,/<audio class="media" controls/);assert.match(html,/2.0 KB/);assert.match(html,new RegExp('href="#m-'+first.id+'"'));
 });
+test('text-filtered server preview matches exact text and skips messages edited after scan',async()=>{
+ const exact={...message(3),content:'Hi'}, substring={...message(2),content:'hi there'}, foreign={...message(1,other),content:'hi'};
+ const f=fixture([exact,substring,foreign]);
+ const serverScope=[{...scope[0],guildId:other}];
+ let validations=0;
+ f.api.validateChannel=async target=>{assert.equal(target.guildId,other);validations++;};
+ const plan=await f.job.scan(serverScope,range,'purge',undefined,{text:'hi',mode:'exact'});
+ assert.deepEqual(plan.messages.map(m=>m.id),[exact.id]);
+ f.api.message=async()=>({...exact,content:'bye'});
+ await f.job.purge(plan);
+ assert.equal(f.job.progress.skipped,1);
+ assert.deepEqual(f.deleted,[]);
+ assert.equal(validations,2);
+ const contains=await fixture([exact,substring,foreign]).job.scan(scope,range,'purge',undefined,{text:'HI',mode:'contains'});
+ assert.deepEqual(contains.messages.map(m=>m.id),[exact.id,substring.id]);
+});

@@ -21,36 +21,36 @@
 .dmm-account { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 12px 16px; background: var(--dmm-surface); border: 1px solid var(--dmm-border); border-radius: 10px; margin-bottom: 20px; font-size: 13px; }
 .dmm-account strong { color: var(--dmm-heading); }
 .dmm-account code { color: var(--dmm-muted); font: 11px/1.5 var(--font-code, monospace); user-select: text; }
-.dmm-grid { display: grid; grid-template-columns: minmax(240px, .85fr) minmax(300px, 1.2fr); gap: 24px; align-items: start; }
-.dmm-sidebar { min-width: 0; }
+.dmm-grid { display: grid; grid-template-columns: minmax(240px, .85fr) minmax(300px, 1.2fr); gap: 24px; align-items: stretch; }
+.dmm-sidebar { min-width: 0; display: flex; flex-direction: column; }
 .dmm-sidebar > h3 { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
 .dmm-count { border: 1px solid var(--dmm-border); border-radius: 20px; color: var(--dmm-muted); font-size: 11px; font-weight: 500; padding: 3px 8px; white-space: nowrap; }
-.dmm input:not([type=checkbox]), .dmm select {
+.dmm input:not([type=checkbox], .dmm-server-picker input), .dmm select {
     display: block; width: 100%; min-width: 0; min-height: 38px;
     background: var(--dmm-input); color: var(--dmm-text);
     border: 1px solid var(--dmm-border); border-radius: 8px;
     padding: 9px 11px; font: inherit; font-size: 13px; line-height: 20px;
     transition: border-color 120ms, box-shadow 120ms;
 }
-.dmm input::placeholder { color: var(--dmm-muted); opacity: .8; }
-.dmm input:not([type=checkbox]):hover, .dmm select:hover { border-color: var(--dmm-muted); }
-.dmm input:focus-visible, .dmm select:focus-visible, .dmm button:focus-visible { outline: 2px solid var(--dmm-brand); outline-offset: 2px; }
-.dmm input:disabled, .dmm select:disabled { opacity: .55; cursor: not-allowed; }
+.dmm input:not(.dmm-server-picker input)::placeholder { color: var(--dmm-muted); opacity: .8; }
+.dmm input:not([type=checkbox], .dmm-server-picker input):hover, .dmm select:hover { border-color: var(--dmm-muted); }
+.dmm input:not(.dmm-server-picker input):focus-visible, .dmm select:focus-visible, .dmm button:focus-visible { outline: 2px solid var(--dmm-brand); outline-offset: 2px; }
+.dmm input:not(.dmm-server-picker input):disabled, .dmm select:disabled { opacity: .55; cursor: not-allowed; }
 .dmm label { display: block; font-size: 12px; font-weight: 500; line-height: 1.5; color: var(--dmm-text); }
 .dmm label > input:not([type=checkbox]) { margin-top: 7px; }
 .dmm-actions { display: flex; gap: 6px; flex-wrap: wrap; margin: 10px 0 12px; }
 .dmm .dmm-actions button { min-height: 29px; border-radius: 7px; font-size: 12px; }
-.dmm-channels { height: clamp(280px, 44vh, 440px); overflow-y: auto; overflow-x: hidden; border: 1px solid var(--dmm-border); background: var(--dmm-input); border-radius: 10px; padding: 5px; scrollbar-width: thin; scrollbar-color: var(--dmm-border) transparent; }
+.dmm-channels { flex: 1 1 0; min-height: clamp(240px, 40vh, 360px); overflow-y: auto; overflow-x: hidden; border: 1px solid var(--dmm-border); background: var(--dmm-input); border-radius: 10px; padding: 5px; scrollbar-width: thin; scrollbar-color: var(--dmm-border) transparent; }
 .dmm .dmm-channel { display: flex; align-items: center; gap: 11px; padding: 10px; margin: 2px 0; border: 1px solid transparent; border-radius: 7px; min-height: 58px; cursor: pointer; transition: background 120ms, border-color 120ms; }
 .dmm-channel:hover { background: var(--background-modifier-hover, #ffffff08); }
 .dmm-channels { position: relative; }
 .dmm-channel.selected { background: color-mix(in srgb, var(--dmm-brand) 14%, transparent); border-color: color-mix(in srgb, var(--dmm-brand) 45%, transparent); }
 .dmm-channel small { display: block; color: var(--dmm-muted); font: 10px/1.5 var(--font-code, monospace); margin-top: 3px; }
 .dmm-channel span { min-width: 0; overflow-wrap: anywhere; font-size: 13px; font-weight: 550; }
-.dmm-channel input { appearance: none; width: 17px; height: 17px; flex: 0 0 17px; margin: 0; border: 1px solid var(--dmm-muted); background: transparent; border-radius: 5px; cursor: pointer; display: grid; place-content: center; }
-.dmm-channel input:checked { background: var(--dmm-brand); border-color: var(--dmm-brand); }
-.dmm-channel input:checked::after { content: ""; width: 7px; height: 4px; border: solid white; border-width: 0 0 2px 2px; transform: translateY(-1px) rotate(-45deg); }
-.dmm-channel input:disabled { cursor: not-allowed; opacity: .5; }
+.dmm-channel input, .dmm-after-purge input[type=checkbox] { appearance: none; width: 17px; height: 17px; flex: 0 0 17px; margin: 0; border: 1px solid var(--dmm-muted); background: transparent; border-radius: 5px; cursor: pointer; display: grid; place-content: center; }
+.dmm-channel input:checked, .dmm-after-purge input[type=checkbox]:checked { background: var(--dmm-brand); border-color: var(--dmm-brand); }
+.dmm-channel input:checked::after, .dmm-after-purge input[type=checkbox]:checked::after { content: ""; width: 7px; height: 4px; border: solid white; border-width: 0 0 2px 2px; transform: translateY(-1px) rotate(-45deg); }
+.dmm-channel input:disabled, .dmm-after-purge input[type=checkbox]:disabled { cursor: not-allowed; opacity: .5; }
 .dmm-sidebar > .dmm-help { margin: 12px 2px 0; }
 .dmm-dates { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 .dmm-options > h3 { margin-bottom: 4px; }
@@ -77,3 +77,22 @@
 .dmm-status .dmm-actions { margin-bottom: 0; }
 @media (max-width: 760px) { .dmm-grid { grid-template-columns: 1fr; gap: 20px; } .dmm-channels { height: 240px; } }
 @media (prefers-reduced-motion: reduce) { .dmm * { transition: none !important; } }
+
+.dmm .dmm-tabs {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 6px;
+    padding: 4px;
+    margin: 0 0 18px;
+    border: 1px solid var(--dmm-border);
+    border-radius: 10px;
+    background: var(--dmm-surface);
+}
+.dmm .dmm-tabs button { width: 100%; }
+.dmm-sidebar > .dmm-field { margin-bottom: 10px; }
+.dmm-delete > .dmm-field { display: grid; gap: 7px; margin: 12px 0; font-size: 12px; font-weight: 600; }
+.dmm-delete > label { margin-top: 12px; }
+
+.dmm-after-purge { margin: 12px 0; padding: 9px 12px; border: 1px solid var(--dmm-border); border-radius: 8px; }
+.dmm-after-purge legend { padding: 0 5px; font-size: 12px; font-weight: 600; }
+.dmm-after-purge label { display: flex; align-items: center; gap: 8px; padding: 4px 0; }

@@ -2,7 +2,7 @@
 import type { PluginNative } from "@utils/types";
 export async function downloadDesktopMedia(url: string, maxBytes: number, signal: AbortSignal): Promise<Uint8Array> {
     signal.throwIfAborted();
-    const native = typeof VencordNative !== "undefined" ? VencordNative.pluginHelpers?.DMsManager as PluginNative<typeof import("./native")> | undefined : undefined;
+    const native = typeof VencordNative !== "undefined" ? VencordNative.pluginHelpers?.MessagesManager as PluginNative<typeof import("./native")> | undefined : undefined;
     if (!native?.downloadMedia) throw Error("Browser blocked this download. Desktop media support is unavailable; rebuild Vencord and fully restart Discord.");
     const id = crypto.randomUUID();
     const abort = () => { void native.cancelMedia(id).catch(() => {}); };

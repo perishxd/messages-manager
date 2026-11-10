@@ -26,7 +26,7 @@ try {
         & $pnpm.Source build
         if ($LASTEXITCODE -ne 0) { throw "Vencord build failed (exit $LASTEXITCODE). Check the error above; Discord has not been restarted." }
     } finally { Pop-Location }
-    Write-Host 'Installed. Fully quit Discord, reopen it, and enable DMsManager in Vencord settings.' -ForegroundColor Green
+    Write-Host 'Installed. Fully quit Discord, reopen it, and enable MessagesManager in Vencord settings.' -ForegroundColor Green
 } catch {
     Write-Host $_.Exception.Message -ForegroundColor Red
     exit 1

@@ -1,15 +1,10 @@
-# DMs Manager 1.0.0
+# MessagesManager 1.1.0
 
-The first public release of DMs Manager.
+- Renamed DMsManager to MessagesManager with an always visible top-bar button.
+- Added DMs and Servers tabs. Server scans, exports, and purges work in selected accessible text channels.
+- Show closed DMs that Discord still has cached or that the manager remembers locally for the account.
+- Preview a purge by exact text or substring. Recheck the current text and author before deleting each message.
+- Added optional post-purge actions for one-to-one DMs and servers. They run after a completed purge, only where messages were deleted.
+- Removed the long help paragraphs from the manager. Export instructions remain in the README.
 
-- Preview and delete your own messages in selected DMs or group DMs.
-- Export themed HTML with local avatars, attachments, emoji, stickers, and guild tags, or save message data as JSON.
-- Minimize a running job and reopen its progress. Get a notification when it finishes.
-- Open the manager from Discord's top bar, with the current DM selected.
-- Download reports show which files couldn't be saved and why.
-
-Extract the download, run `Install-DMsManager.cmd` on Windows, and fully restart Discord. For manual installation, copy `DMsManager` to your Vencord checkout's `src/userplugins`, then run `pnpm build`.
-
-For exported archives, use **Extract All** before opening `index.html`. Media downloads are limited to 25 MB per file and 100 MB per export; unsaved files retain their original links. Fonts aren't bundled.
-
-Deletion is permanent and applies only to messages from the account currently signed in. Review the preview before confirming.
+Replace your existing `src/userplugins/DMsManager` folder using the installer or the included source. Rebuild, restart Discord, and enable MessagesManager.
