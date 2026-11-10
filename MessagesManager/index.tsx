@@ -222,8 +222,8 @@ function openManager(initial?: string) {
         updateRun({ busy: false, plan: undefined, progress: undefined, status: "" });
     }
     if (!draft && !active) updateRun({ busy: false, plan: undefined, progress: undefined, status: "" });
-    modalKey = openModal(props => <Manager {...props} initial={initial} minimize={() => closeModal("dms-manager")} />, {
-        modalKey: "dms-manager", onCloseCallback: () => {
+    modalKey = openModal(props => <Manager {...props} initial={initial} minimize={() => closeModal("messages-manager")} />, {
+        modalKey: "messages-manager", onCloseCallback: () => {
             modalKey = undefined;
             // Backdrop clicks and Escape may close the modal without calling its onClose prop.
             // Only the explicit cancellation controls stop a job.
@@ -413,7 +413,7 @@ export default definePlugin({
             replace: "$1$self.renderTitlebarButton(),"
         }
     }],
-    renderTitlebarButton: () => <ErrorBoundary key="dms-manager" noop><TitlebarButton /></ErrorBoundary>,
+    renderTitlebarButton: () => <ErrorBoundary key="messages-manager" noop><TitlebarButton /></ErrorBoundary>,
     toolboxActions: { "Open Messages Manager": () => openManager() },
     start() { enableStyle(pluginStyle); enabled = true; accountChanged(); UserStore.addChangeListener(accountChanged); ChannelStore.addChangeListener(rememberOpenDMs); rememberOpenDMs(); },
     stop() { enabled = false; draft = undefined; active?.cancel("MessagesManager disabled."); UserStore.removeChangeListener(accountChanged); ChannelStore.removeChangeListener(rememberOpenDMs); if (modalKey) closeModal(modalKey); disableStyle(pluginStyle); }

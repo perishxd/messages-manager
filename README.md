@@ -54,16 +54,17 @@ No backend, token entry, or upload service is used. Exported files contain priva
 
 Requires a source installation of Vencord.
 
-On Windows, extract the entire download first, then run `Install-DMsManager.cmd`. It checks both `Documents\Vencord` under your user folder and the Windows Documents location (including OneDrive), backs up an existing DMsManager folder, and builds Vencord. Other custom plugins are left in place.
+On Windows, extract the entire download first, then run `Install-MessagesManager.cmd`. It checks both `Documents\Vencord` under your user folder and the Windows Documents location (including OneDrive), moves existing DMsManager and MessagesManager folders to a backup outside the plugin directory, and builds Vencord. Other custom plugins are left in place.
 
 To install manually on Windows or Mac:
 
-1. Copy this `DMsManager` folder into your Vencord checkout's `src/userplugins` directory.
+1. Move any old `src/userplugins/DMsManager` folder outside `src/userplugins` so Vencord does not load both copies.
+2. Copy this `MessagesManager` folder into your Vencord checkout's `src/userplugins` directory.
 2. Open a terminal in the Vencord checkout and run `pnpm build`.
-3. Fully quit Discord, including its tray/menu-bar process, then reopen it.
-4. Enable **MessagesManager** in Vencord's plugin settings.
+4. Fully quit Discord, including its tray/menu-bar process, then reopen it.
+5. Enable **MessagesManager** in Vencord's plugin settings.
 
-The final source path must be `src/userplugins/DMsManager/index.tsx`, with no extra nested DMsManager folder. For a checkout that hasn't been injected yet, run `pnpm inject` after a successful build and select the Discord installation you use.
+The final source path must be `src/userplugins/MessagesManager/index.tsx`, with no extra nested MessagesManager folder. For a checkout that hasn't been injected yet, run `pnpm inject` after a successful build and select the Discord installation you use.
 
 ## Development
 
@@ -72,7 +73,7 @@ The first build passed TypeScript checking and a production Vencord build. Autom
 From the Vencord checkout, run the core tests with:
 
 ```sh
-node --test src/userplugins/DMsManager/tests/*.test.mjs
+node --test src/userplugins/MessagesManager/tests/*.test.mjs
 ```
 
 Licensed under GPL-3.0-or-later.

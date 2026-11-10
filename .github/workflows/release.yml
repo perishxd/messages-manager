@@ -9,7 +9,7 @@ on:
       tag:
         description: Existing release tag to publish
         required: true
-        default: v1.0.0
+        default: v1.1.0
         type: string
 
 permissions:
@@ -30,7 +30,7 @@ jobs:
           RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
         run: |
           VERSION="${RELEASE_TAG#v}"
-          python3 tools/package_release.py "$VERSION" "$RUNNER_TEMP/DMsManager-$VERSION.zip"
+          python3 tools/package_release.py "$VERSION" "$RUNNER_TEMP/MessagesManager-$VERSION.zip"
 
       - name: Publish GitHub release
         env:
@@ -39,4 +39,4 @@ jobs:
           RELEASE_TAG: ${{ github.event_name == 'workflow_dispatch' && inputs.tag || github.ref_name }}
         run: |
           VERSION="${RELEASE_TAG#v}"
-          gh release create "$RELEASE_TAG" "$RUNNER_TEMP/DMsManager-$VERSION.zip" --verify-tag --title "DMs Manager $VERSION" --notes-file RELEASE_NOTES.md
+          gh release create "$RELEASE_TAG" "$RUNNER_TEMP/MessagesManager-$VERSION.zip" --verify-tag --title "Messages Manager $VERSION" --notes-file RELEASE_NOTES.md

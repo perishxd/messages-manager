@@ -6,18 +6,21 @@ try {
         $VencordPath = $candidates | Where-Object { Test-Path (Join-Path $_ 'scripts\build\build.mjs') } | Select-Object -First 1
         if (-not $VencordPath) { throw 'Vencord source was not found in Documents or OneDrive Documents. Supply -VencordPath with the path to your checkout.' }
     }
-    $source = Join-Path $PSScriptRoot 'DMsManager'
+    $source = Join-Path $PSScriptRoot 'MessagesManager'
     if (-not (Test-Path (Join-Path $source 'index.tsx'))) { throw 'Extract the entire ZIP before running this installer.' }
     if (-not (Test-Path (Join-Path $VencordPath 'scripts\build\build.mjs'))) { throw "Vencord source was not found at $VencordPath. Use the manual instructions in README.md or supply -VencordPath." }
     $pnpm = Get-Command pnpm.cmd -ErrorAction Stop
     $plugins = Join-Path $VencordPath 'src\userplugins'
     New-Item -ItemType Directory -Force -Path $plugins | Out-Null
-    $target = Join-Path $plugins 'DMsManager'
-    if (Test-Path $target) {
-        $backup = Join-Path ([Environment]::GetFolderPath('MyDocuments')) ('DMsManagerBackups\' + [Guid]::NewGuid().ToString())
-        New-Item -ItemType Directory -Force -Path $backup | Out-Null
-        Copy-Item -LiteralPath $target -Destination $backup -Recurse
-        Write-Host "Previous source backed up to $backup"
+    $target = Join-Path $plugins 'MessagesManager'
+    foreach ($name in @('DMsManager', 'MessagesManager')) {
+        $existing = Join-Path $plugins $name
+        if (Test-Path -LiteralPath $existing) {
+            $backup = Join-Path ([Environment]::GetFolderPath('MyDocuments')) ('MessagesManagerBackups\' + [Guid]::NewGuid().ToString())
+            New-Item -ItemType Directory -Force -Path $backup | Out-Null
+            Move-Item -LiteralPath $existing -Destination $backup
+            Write-Host "Previous source backed up to $backup"
+        }
     }
     New-Item -ItemType Directory -Force -Path $target | Out-Null
     Get-ChildItem -LiteralPath $source -Force | Copy-Item -Destination $target -Recurse -Force

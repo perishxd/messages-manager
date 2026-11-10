@@ -7,4 +7,4 @@
 - Added optional post-purge actions for one-to-one DMs and servers. They run after a completed purge, only where messages were deleted.
 - Removed the long help paragraphs from the manager. Export instructions remain in the README.
 
-Replace your existing `src/userplugins/DMsManager` folder using the installer or the included source. Rebuild, restart Discord, and enable MessagesManager.
+Run `Install-MessagesManager.cmd` on Windows, or move the old `src/userplugins/DMsManager` folder out of the plugin directory and copy in `MessagesManager`. Rebuild, restart Discord, and enable MessagesManager.
