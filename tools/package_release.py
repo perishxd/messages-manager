@@ -14,7 +14,7 @@ source = (root / "DMsManager/version.ts").read_text(encoding="utf-8")
 if f'export const VERSION = "{version}";' not in source:
     raise SystemExit("Tag version doesn't match DMsManager/version.ts. Update the version before tagging.")
 notes = (root / "RELEASE_NOTES.md").read_text(encoding="utf-8")
-if not notes.startswith(f"# DMs Manager {version}\n"):
+if not notes.startswith(f"# MessagesManager {version}\n"):
     raise SystemExit("Update RELEASE_NOTES.md for this version before tagging.")
 output_path = Path(output).resolve()
 output_path.parent.mkdir(parents=True, exist_ok=True)
@@ -30,3 +30,4 @@ with zipfile.ZipFile(output_path) as archive:
     if archive.testzip() is not None:
         raise SystemExit("Archive integrity check failed.")
 print(output_path)
+
